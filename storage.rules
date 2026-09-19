@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Ticket photos: any signed-in staff member can upload (matches who can
+// attach photos in the app: solicitante on creation, admin/gestor/
+// manutencao on notes and conclusion) and read (photos are viewed from
+// ticket detail, which is already access-controlled by firestore.rules —
+// this just needs to not be wide open to the internet).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /tickets/{ticketId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+    match /drafts/{draftId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+  }
+}

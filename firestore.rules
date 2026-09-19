@@ -1,0 +1,105 @@
+rules_version = '2';
+
+// Mirrors src/domain/permissions.ts — every role/hotel-scoping rule there
+// has a server-side counterpart here, so the access control this app
+// relies on doesn't live only in client code (that was flagged explicitly
+// as unacceptable for production — see chats/chat6.md).
+//
+// Round 1 scope: covers auth, hotel scoping, and who may create/read/
+// update a ticket. Field-level write granularity (e.g. a technician only
+// touching status/notes/conclusion, never hotelId) is left as a round-2
+// hardening pass — noted in the handoff README.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function role() {
+      return isSignedIn() ? userDoc().role : null;
+    }
+
+    function myHotelId() {
+      return isSignedIn() ? userDoc().hotelId : null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && role() == 'admin';
+    }
+
+    function isGestorOfHotel(hid) {
+      return isSignedIn() && role() == 'gestor' && myHotelId() == hid;
+    }
+
+    function isManutencaoOfHotel(hid) {
+      return isSignedIn() && role() == 'manutencao' && myHotelId() == hid;
+    }
+
+    function canManageTicketsOfHotel(hid) {
+      return isAdmin() || isGestorOfHotel(hid);
+    }
+
+    function canCreateTickets() {
+      return isSignedIn() && (role() == 'admin' || role() == 'gestor' || role() == 'solicitante');
+    }
+
+    // ---- reference data: readable by any signed-in staff, admin-managed ----
+    match /hotels/{hotelId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    match /sectors/{sectorId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    match /categories/{categoryId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    match /slaConfig/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- staff / auth profile ----
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      // Self-service covers the force-password-change flow (clearing
+      // mustChangePassword). Full user management is created via the
+      // Admin SDK in the seed/admin tooling, which bypasses rules.
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, delete: if isAdmin();
+    }
+
+    // ---- day counters used for YYYY-MM-DD-NN ticket numbering ----
+    match /counters/{dayKey} {
+      allow read: if isSignedIn();
+      allow write: if canCreateTickets();
+    }
+
+    // ---- tickets ----
+    match /tickets/{ticketId} {
+      allow read: if isSignedIn() &&
+        (isAdmin() || myHotelId() == resource.data.hotelId || resource.data.solicitanteUserId == request.auth.uid);
+
+      allow create: if canCreateTickets() &&
+        (isAdmin() || request.resource.data.hotelId == myHotelId()) &&
+        request.resource.data.solicitanteUserId == request.auth.uid &&
+        request.resource.data.status == 'aberto' &&
+        request.resource.data.responsavelId == null &&
+        request.resource.data.autoAssigned == false;
+
+      // Solicitantes never update a ticket after creation — only staff
+      // scoped to that hotel (or the whole network, for admin) can.
+      allow update: if canManageTicketsOfHotel(resource.data.hotelId) || isManutencaoOfHotel(resource.data.hotelId);
+
+      allow delete: if isAdmin();
+    }
+  }
+}

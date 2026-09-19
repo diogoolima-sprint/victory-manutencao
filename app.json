@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Victory Manutenção",
+    "slug": "victory-manutencao",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "victory-manutencao",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F4F1EC",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.victoryhoteis.manutencao"
+    },
+    "android": {
+      "package": "br.com.victoryhoteis.manutencao",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["CAMERA", "READ_MEDIA_IMAGES"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app usa suas fotos para anexar imagens aos chamados de manutenção.",
+          "cameraPermission": "O app usa a câmera para fotografar o problema reportado no chamado."
+        }
+      ]
+    ]
+  }
+}
