@@ -52,6 +52,7 @@ export function NewTicketWizardScreen() {
 
   const effectiveHotelId = user.role === 'admin' ? hotelId : user.hotelId || '';
   const selectedSector = sectors.find((s) => s.id === sectorId);
+  const steps = useMemo(() => getWizardSteps(user.role, selectedSector), [user.role, selectedSector]);
   const stepIndex = steps.indexOf(step);
   const fieldStepCount = steps.length - 1;
   const stepLabel = `Etapa ${stepIndex + 1} de ${fieldStepCount}`;
