@@ -52,11 +52,11 @@ export function NewTicketWizardScreen() {
 
   const effectiveHotelId = user.role === 'admin' ? hotelId : user.hotelId || '';
   const selectedSector = sectors.find((s) => s.id === sectorId);
-  const steps = useMemo(() => getWizardSteps(user.role, selectedSector), [user.role, selectedSector]);
   const stepIndex = steps.indexOf(step);
-  const stepLabel = `Etapa ${stepIndex + 1} de ${steps.length}`;
-  const progressPct = Math.round(((stepIndex + 1) / steps.length) * 100);
-  const isLastFieldStep = stepIndex === steps.length - 1;
+  const fieldStepCount = steps.length - 1;
+  const stepLabel = `Etapa ${stepIndex + 1} de ${fieldStepCount}`;
+  const progressPct = Math.round(((stepIndex + 1) / fieldStepCount) * 100);
+  const isLastFieldStep = stepIndex === fieldStepCount - 1;
 
   function validateStep(s: WizardStep): boolean {
     switch (s) {

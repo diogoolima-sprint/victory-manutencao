@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,9 +18,9 @@ function NewTicketFabButton() {
   const rootNav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <View style={styles.fabWrap} pointerEvents="box-none">
-      <View style={styles.fab} onTouchEnd={() => rootNav.navigate('NewTicket')}>
+      <Pressable style={styles.fab} onPress={() => rootNav.navigate('NewTicket')}>
         <PlusIcon />
-      </View>
+      </Pressable>
       <Text style={styles.fabLabel}>Novo</Text>
     </View>
   );
