@@ -34,6 +34,10 @@ yarn-error.*
 .env
 .env*.local
 
+# Firebase service account keys (used only for seeding a real project)
+serviceAccountKey.json
+*serviceAccountKey*.json
+
 # typescript
 *.tsbuildinfo
 

@@ -1,22 +1,39 @@
+$ cat /home/claude/repo/victory-manutencao/scripts/seed.ts
+
 /**
- * Seeds the Firebase Local Emulator Suite with the exact demo dataset
- * from the design prototype (project/Victory Manutenção.dc.html):
- * 2 hotels, their sectors, the 10 categories, 5 staff accounts (as real
- * Firebase Auth users), and ~20 sample tickets with realistic timelines.
+ * Seeds the exact demo dataset from the design prototype
+ * (project/Victory Manutenção.dc.html): 2 hotels, their sectors, the 10
+ * categories, 5 staff accounts (as real Firebase Auth users), and ~20
+ * sample tickets with realistic timelines.
  *
  * Uses the Admin SDK, which bypasses firestore.rules/storage.rules
  * entirely — this is trusted server-side tooling, never shipped in the
- * app. Run with the emulators already up: `npm run seed` (see README).
+ * app.
+ *
+ * By default this seeds the local Firebase Emulator Suite: `npm run seed`
+ * (see README). To seed a REAL Firebase project instead, set:
+ *   SEED_USE_EMULATOR=false
+ *   SEED_PROJECT_ID=<your real Firebase project id>
+ *   GOOGLE_APPLICATION_CREDENTIALS=<path to a service account key JSON,
+ *     downloaded from Firebase Console → Project settings → Service
+ *     accounts → Generate new private key>
+ * before running `npm run seed`. Never commit that key file.
  */
-import { initializeApp } from 'firebase-admin/app';
+import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
-process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080';
-process.env.FIREBASE_AUTH_EMULATOR_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099';
+const USE_EMULATOR = process.env.SEED_USE_EMULATOR !== 'false';
+const PROJECT_ID = process.env.SEED_PROJECT_ID || 'demo-victory-manutencao';
 
-const PROJECT_ID = 'demo-victory-manutencao';
-const app = initializeApp({ projectId: PROJECT_ID });
+if (USE_EMULATOR) {
+  process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080';
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099';
+}
+
+const app = USE_EMULATOR
+  ? initializeApp({ projectId: PROJECT_ID })
+  : initializeApp({ projectId: PROJECT_ID, credential: applicationDefault() });
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -118,7 +135,7 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
 const dayKey = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 
 async function main() {
-  console.log(`Seeding emulator project "${PROJECT_ID}"...`);
+  console.log(`Seeding ${USE_EMULATOR ? 'EMULATOR' : 'REAL'} project "${PROJECT_ID}"...`);
 
   console.log('Creating Auth users + hotels + sectors + categories...');
   for (const u of staff) {
