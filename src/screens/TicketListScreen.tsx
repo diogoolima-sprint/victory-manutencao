@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -129,7 +129,7 @@ export function TicketListScreen() {
         <NotificationBell />
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
+      <View style={styles.chipRow}>
         {quickFilters.map((qf) => (
           <Pressable
             key={qf.key}
@@ -139,7 +139,7 @@ export function TicketListScreen() {
             <Text style={[styles.chipText, quick === qf.key && styles.chipTextActive]}>{qf.label}</Text>
           </Pressable>
         ))}
-      </ScrollView>
+      </View>
 
       <Pressable onPress={() => setFiltersOpen((v) => !v)} style={styles.filtersToggle}>
         <Text style={styles.filtersToggleText}>{filtersOpen ? 'Ocultar filtros' : 'Mais filtros'}</Text>
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   title: { fontFamily: fonts.sans, fontWeight: '700', fontSize: 22, color: colors.victoryInk, letterSpacing: -0.3 },
   subtitle: { fontFamily: fonts.sans, fontSize: 13.5, color: colors.textMuted, marginTop: 2 },
-  chipRow: { flexGrow: 0, marginBottom: 6 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, marginBottom: 6 },
   chip: {
     paddingHorizontal: 15,
     paddingVertical: 8,

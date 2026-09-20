@@ -4,6 +4,7 @@ import { inHotelScope } from './permissions';
 
 export interface AppNotification {
   id: string;
+  ticketId: string;
   text: string;
   at: number;
 }
@@ -29,10 +30,10 @@ export function deriveNotifications(
 
     if (isNonTerminal(t)) {
       const sla = computeSla(t, slaConfig, now);
-      if (sla.state === 'overdue') {
-        notifications.push({ id: `${t.id}-o`, text: `Chamado ${t.number} está com o SLA estourado.`, at: now.getTime() });
+        if (sla.state === 'overdue') {
+        notifications.push({ id: `${t.id}-o`, ticketId: t.id, text: `Chamado ${t.number} está com o SLA estourado.`, at: now.getTime() });
       } else if (sla.state === 'warning' && t.priority !== 'urgente') {
-        notifications.push({ id: `${t.id}-w`, text: `Chamado ${t.number} está próximo do prazo de SLA.`, at: now.getTime() });
+        notifications.push({ id: `${t.id}-w`, ticketId: t.id, text: `Chamado ${t.number} está próximo do prazo de SLA.`, at: now.getTime() });
       }
     }
 
@@ -41,6 +42,7 @@ export function deriveNotifications(
       if (last.label === 'Responsável atribuído') {
         notifications.push({
           id: `${t.id}-a`,
+          ticketId: t.id,
           text: `Chamado ${t.number} foi atribuído a você${t.autoAssigned ? ' automaticamente pelo sistema.' : '.'}`,
           at: last.at,
         });
@@ -48,7 +50,7 @@ export function deriveNotifications(
     }
 
     if (t.solicitanteUserId === currentUser.id && t.timeline.length === 1) {
-      notifications.push({ id: `${t.id}-c`, text: `Chamado ${t.number} foi criado com sucesso.`, at: t.createdAt });
+      notifications.push({ id: `${t.id}-c`, ticketId: t.id, text: `Chamado ${t.number} foi criado com sucesso.`, at: t.createdAt });
     }
   }
 
