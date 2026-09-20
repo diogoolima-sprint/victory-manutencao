@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "demo-victory-manutencao"
-  }
+    "default": "demo-victory-manutencao",
+    "victory-manutencao": "victory-manutencao"
+  },
+  "targets": {},
+  "etags": {}
 }

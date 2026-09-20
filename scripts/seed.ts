@@ -1,5 +1,3 @@
-$ cat /home/claude/repo/victory-manutencao/scripts/seed.ts
-
 /**
  * Seeds the exact demo dataset from the design prototype
  * (project/Victory Manutenção.dc.html): 2 hotels, their sectors, the 10

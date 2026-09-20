@@ -37,6 +37,11 @@ yarn-error.*
 # Firebase service account keys (used only for seeding a real project)
 serviceAccountKey.json
 *serviceAccountKey*.json
+*firebase-adminsdk*.json
+
+# Firebase service account keys (used only for seeding a real project)
+serviceAccountKey.json
+*serviceAccountKey*.json
 
 # typescript
 *.tsbuildinfo
