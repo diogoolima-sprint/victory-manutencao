@@ -1,22 +1,33 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, Modal, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, fonts } from '../theme';
 import { BellIcon } from './icons';
 import { useAuth } from '../state/AuthContext';
 import { useTickets } from '../state/TicketsContext';
 import { useSlaConfig } from '../state/useSlaConfig';
 import { deriveNotifications } from '../domain/notifications';
+import { RootStackParamList } from '../navigation/types';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 /** Ported from the prototype's bell dropdown (top nav) — same derivation,
  *  same copy ("Notificações" / empty state), shown as a bottom sheet here
  *  since there's no persistent top nav chrome on mobile. */
 export function NotificationBell({ dark }: { dark?: boolean }) {
+  const navigation = useNavigation<Nav>();
   const { user } = useAuth();
   const { tickets } = useTickets();
   const slaConfig = useSlaConfig();
   const [open, setOpen] = useState(false);
 
   const notifications = useMemo(() => deriveNotifications(tickets, user, slaConfig), [tickets, user, slaConfig]);
+
+  function openTicket(ticketId: string) {
+    setOpen(false);
+    navigation.navigate('TicketDetail', { ticketId });
+  }
 
   return (
     <>
@@ -38,9 +49,9 @@ export function NotificationBell({ dark }: { dark?: boolean }) {
             keyExtractor={(n) => n.id}
             style={{ maxHeight: 380 }}
             renderItem={({ item }) => (
-              <View style={styles.row}>
+              <Pressable style={styles.row} onPress={() => openTicket(item.ticketId)}>
                 <Text style={styles.rowText}>{item.text}</Text>
-              </View>
+              </Pressable>
             )}
             ListEmptyComponent={<Text style={styles.empty}>Nenhuma notificação no momento.</Text>}
           />
